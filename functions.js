@@ -185,7 +185,7 @@ function updateSheetRow(updateData, updateRange){
         $('.formInput').prop("readonly", true);
         $('#uploadWidget').prop("disabled", true);
 
-        $('#intakeStatus, #intakeTitle').prop("disabled", true);
+        $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop("disabled", true);
         $('#editContactButton').text("Edit");
         getSheetData()
 
@@ -198,7 +198,7 @@ function updateSheetRow(updateData, updateRange){
       $('#saveContactButton').hide();
       $('.formInput').prop("readonly", true);
       $('#uploadWidget').prop("disabled", true);
-      $('#intakeStatus, #intakeTitle').prop("disabled", true);
+      $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop("disabled", true);
       $('#editContactButton').text("Edit");
   });
 }
@@ -251,6 +251,8 @@ $('#detailsModal').on('show.bs.modal', function (event) {
   modal.find('#moreInfoContainer')[0].innerHTML = '';
   $("#intakeTitle").val(currentRowData['Intake Title']);
   $("#intakeStatus").val(currentRowData['Intake Status']);
+  $('#intakeNeedsFoster').val(currentRowData['Intake Needs Foster']);
+  $('#intakeNeedsTrap').val(currentRowData['Intake Needs Trap']);
   for (let detail in currentRowData) {
     if (!["sheetIndex", "images", "comments", "entryId", "Intake Status",
           "Images", "headers", "Summary"].includes(detail)) {
@@ -311,8 +313,10 @@ $('#detailsModal').on('hidden.bs.modal', function (event) {
   modal.find('#comments').empty();
   modal.find('#modalImages').empty();
   $('#intakeTitle').empty();
+  $('#intakeNeedsFoster').empty();
+  $('#intakeNeedsTrap').empty();
   $('.formInput').prop("readonly", true);
-  $('#intakeStatus, #intakeTitle').prop("disabled", true);
+  $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop("disabled", true);
   $('#uploadWidget').addClass("disable-div");
   $('#moreInfoButton').text("Show More");
   $('#editContactButton').text("Edit");
@@ -402,7 +406,7 @@ function resetImagesPreviews() {
 
 function editIntakeStatus(){
     if($('#editContactButton')[0].innerText == "Edit"){
-        $('#intakeStatus, #intakeTitle').prop('disabled', false);
+        $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop('disabled', false);
         $('#uploadWidget').removeClass("disable-div");
         $('#editContactButton').text("Cancel Edit");
         $('#saveContactButton').show();
@@ -412,7 +416,7 @@ function editIntakeStatus(){
     else {
         document.getElementById("uploadWidget").removeEventListener("click", handleImageUploadClick);
         $('#uploadWidget').addClass('disable-div');
-        $('#intakeStatus, #intakeTitle').prop('disabled', true);
+        $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop('disabled', true);
         $('#editContactButton').text("Edit");
         $('#saveContactButton').hide();
         $('.delete').hide();
@@ -427,7 +431,9 @@ function saveIntakeStatus(){
   formData.forEach(entry => {
     formDataObj[entry.name] = entry.value;
   })
-  let formDataArray = [formDataObj['imageURLs'], formDataObj['Intake Status'], formDataObj['intakeTitle']];
+  let formDataArray = [formDataObj['imageURLs'], formDataObj['Intake Status'],
+    formDataObj['intakeTitle'], formDataObj['intakeNeedsFoster'],
+        formDataObj['intakeNeedsTrap']];
   // currentRowData["headers"].forEach(header => {
   //   if (!["Timestamp"].includes(header)) {
   //     if (formDataObj[header] || formDataObj[header] == "") {
