@@ -8,16 +8,24 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <style>
 body {
-  font-family: sans-serif;
-  font-family: Ubuntu;
-  font-size: 15px;
-  line-height: 20px;
+  /*font-family: sans-serif;*/
+  /*font-family: Ubuntu;*/
+  /*font-size: 15px;*/
+  /*line-height: 20px;*/
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
 }
 a {
   color: #35abc5;
 }
 a:hover {
   color: black;
+}
+svg {
+  vertical-align: text-top;
 }
 .btn{
   color: white;
@@ -91,7 +99,9 @@ a:hover {
   background-color: #5ebed4;
 }
 .transparent-btn {
-  border: none;
+  box-shadow: none;
+  border: 2px solid #52bad1;
+  color: #52bad1;
   background-color: transparent;
   -webkit-transition: background-color 170ms ease-out,color 170ms ease-out;
   -moz-transition: background-color 170ms ease-out,color 170ms ease-out;
@@ -139,24 +149,48 @@ a:hover {
   box-shadow: 0 2px 0 0 #34abc5;
 }
 .carousel-inner {
-  background-color: #80808038;
+  background-color: #76c3d53d;
 }
 .search {
-  float: left;
+  padding: 0.4em;
+  height: 45px;
+  font-size: x-large;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+}
+.card-img-container {
+  background-color: #76c3d53d;
+}
+.card-body-element {
+  padding: 0.3em 0em 0.3em 0em;
+}
+.comment-container {
+  border-left: 1px solid #dff0f4;
+  margin: 0.5em;
+  padding: 0.5em;
+}
+@media all and (max-width: 500px) {
+  .search {
+    margin-top: 2em;
+  }
+  .reverse {
+    flex-wrap: wrap-reverse;
+  }
+
 }
     </style>
   </head>
   <body class="container-fluid">
     <main role="main">
-      <section id="title" class="py-5 text-center container" style="text-align: right;">
+      <section id="title" class="py-5 text-center container">
+          <div class="d-flex justify-content-around align-items-center row reverse">
+            <input type="text" id="search" class="search" placeholder="Search">
             <div id="unauthorizedBlock" style="display: none;">
               Please sign in to Google to get started: <button id="authorize_button" class="btn btn-secondary">Authorize</button>
             </div>
-            <div id="authorizedBlock" style="display: block;float: right;">
-              <button id="signout_button" class="btn">Sign Out</button>
+            <div id="authorizedBlock">
+              <button id="signout_button" class="transparent-btn btn">Sign Out</button>
             </div>
-          <pre id="error" style="white-space: pre-wrap;"></pre>
-        <input type="text" id="search" class="search" placeholder="Search">
+        <pre id="error" style="white-space: pre-wrap;"></pre>
       </section>
       <div id="mainContainer">
         <ul class="nav nav-tabs" id="navTab" role="tablist">
@@ -322,7 +356,7 @@ a:hover {
         {{#newEntryData}}
         <div class="col-md-4">
           <div class="card mb-4 shadow-sm">
-            <div id={{entryId}} onclick="openImagesModal(this, true)">
+            <div id={{entryId}} onclick="openImagesModal(this, true)" class="card-img-container">
               {{#if images.[0]}}
                   <img src="{{images.[0]}}" style='width: 100%; height:250px; color:#eceeef; object-fit: scale-down' class="card-img-top">
               {{else}}
@@ -330,28 +364,49 @@ a:hover {
               {{/if}}
             </div>
             <div class="card-body">
-              <div style="margin: 1em 0 2em 0;">
-                <small class="text-muted">Date Submitted: {{[submittedOn]}}</small>
-              </div>
               <div>
-                👤 Name: {{[Name]}}
-              </div>
-              <div>
-                📍 Location: <a href="https://www.google.com/maps/dir/Your+Location/{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}">{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}</a>
                 <h3>{{[Intake Title]}}</h3>
               </div>
-              <div>
-                📞 Phone: <a href="tel:{{[Phone]}}">{{[Phone]}}</a>
+              <div style="margin: 1em 0 1em 0;">
+                <small class="text-muted">Date Submitted: {{[submittedOn]}}</small>
               </div>
-              <div>
-                📧 Email: <a href="mailto:{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}">{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}</a>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"></path>
+                  <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+                  <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path>
+                </svg>
+                <b>Name:</b> {{[Name]}}
               </div>
-              <div>
-                Comments:
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-geo" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 4a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
+                  <path d="M7.5 4h1v9a.5.5 0 0 1-1 0V4z"></path>
+                  <path fill-rule="evenodd" d="M6.489 12.095a.5.5 0 0 1-.383.594c-.565.123-1.003.292-1.286.472-.302.192-.32.321-.32.339 0 .013.005.085.146.21.14.124.372.26.701.382.655.246 1.593.408 2.653.408s1.998-.162 2.653-.408c.329-.123.56-.258.701-.382.14-.125.146-.197.146-.21 0-.018-.018-.147-.32-.339-.283-.18-.721-.35-1.286-.472a.5.5 0 1 1 .212-.977c.63.137 1.193.34 1.61.606.4.253.784.645.784 1.182 0 .402-.219.724-.483.958-.264.235-.618.423-1.013.57-.793.298-1.855.472-3.004.472s-2.21-.174-3.004-.471c-.395-.148-.749-.336-1.013-.571-.264-.234-.483-.556-.483-.958 0-.537.384-.929.783-1.182.418-.266.98-.47 1.611-.606a.5.5 0 0 1 .595.383z"></path>
+                </svg>
+                <b>Location:</b> <a href="https://www.google.com/maps/dir/Your+Location/{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}">{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-telephone" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M3.925 1.745a.636.636 0 0 0-.951-.059l-.97.97c-.453.453-.62 1.095-.421 1.658A16.47 16.47 0 0 0 5.49 10.51a16.471 16.471 0 0 0 6.196 3.907c.563.198 1.205.032 1.658-.421l.97-.97a.636.636 0 0 0-.06-.951l-2.162-1.682a.636.636 0 0 0-.544-.115l-2.052.513a1.636 1.636 0 0 1-1.554-.43L5.64 8.058a1.636 1.636 0 0 1-.43-1.554l.513-2.052a.636.636 0 0 0-.115-.544L3.925 1.745zM2.267.98a1.636 1.636 0 0 1 2.448.153l1.681 2.162c.309.396.418.913.296 1.4l-.513 2.053a.636.636 0 0 0 .167.604L8.65 9.654a.636.636 0 0 0 .604.167l2.052-.513a1.636 1.636 0 0 1 1.401.296l2.162 1.681c.777.604.849 1.753.153 2.448l-.97.97c-.693.693-1.73.998-2.697.658a17.47 17.47 0 0 1-6.571-4.144A17.47 17.47 0 0 1 .639 4.646c-.34-.967-.035-2.004.658-2.698l.97-.969z"></path>
+                </svg>
+                <b>Phone:</b> <a href="tel:{{[Phone]}}">{{[Phone]}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-envelope-open" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M8.47 1.318a1 1 0 0 0-.94 0l-6 3.2A1 1 0 0 0 1 5.4v.818l5.724 3.465L8 8.917l1.276.766L15 6.218V5.4a1 1 0 0 0-.53-.882l-6-3.2zM15 7.388l-4.754 2.877L15 13.117v-5.73zm-.035 6.874L8 10.083l-6.965 4.18A1 1 0 0 0 2 15h12a1 1 0 0 0 .965-.738zM1 13.117l4.754-2.852L1 7.387v5.73zM7.059.435a2 2 0 0 1 1.882 0l6 3.2A2 2 0 0 1 16 5.4V14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V5.4a2 2 0 0 1 1.059-1.765l6-3.2z"></path>
+                </svg>
+                <b>Email:</b> <a href="mailto:{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}">{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil-square" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path>
+                  <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
+                </svg>
+                <b>Comments:</b>
                   <div>
                     {{#each comments as | comment |}}
-                    <span>[{{comment.[0]}}] {{comment.[2]}} -- {{comment.[1]}}</span>
-                      <br>
+                    <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
                     {{/each}}
                   </div>
               </div>
@@ -385,7 +440,7 @@ a:hover {
         {{#needsInfoData}}
         <div class="col-md-4">
           <div class="card mb-4 shadow-sm">
-            <div id={{entryId}} onclick="openImagesModal(this, true)">
+            <div id={{entryId}} onclick="openImagesModal(this, true)" class="card-img-container">
               {{#if images.[0]}}
                   <img src="{{images.[0]}}" style='width: 100%; height:250px; color:#eceeef; object-fit: scale-down' class="card-img-top">
               {{else}}
@@ -393,28 +448,49 @@ a:hover {
               {{/if}}
             </div>
             <div class="card-body">
-              <div style="margin: 1em 0 2em 0;">
-                <small class="text-muted">Date Submitted: {{[submittedOn]}}</small>
-              </div>
               <div>
-                👤 Name: {{[Name]}}
-              </div>
-              <div>
-                📍 Location: <a href="https://www.google.com/maps/dir/Your+Location/{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}">{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}</a>
                 <h3>{{[Intake Title]}}</h3>
               </div>
-              <div>
-                📞 Phone: <a href="tel:{{[Phone]}}">{{[Phone]}}</a>
+              <div style="margin: 1em 0 1em 0;">
+                <small class="text-muted">Date Submitted: {{[submittedOn]}}</small>
               </div>
-              <div>
-                📧 Email: <a href="mailto:{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}">{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}</a>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"></path>
+                  <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+                  <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path>
+                </svg>
+                <b>Name:</b> {{[Name]}}
               </div>
-              <div>
-                Comments:
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-geo" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 4a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
+                  <path d="M7.5 4h1v9a.5.5 0 0 1-1 0V4z"></path>
+                  <path fill-rule="evenodd" d="M6.489 12.095a.5.5 0 0 1-.383.594c-.565.123-1.003.292-1.286.472-.302.192-.32.321-.32.339 0 .013.005.085.146.21.14.124.372.26.701.382.655.246 1.593.408 2.653.408s1.998-.162 2.653-.408c.329-.123.56-.258.701-.382.14-.125.146-.197.146-.21 0-.018-.018-.147-.32-.339-.283-.18-.721-.35-1.286-.472a.5.5 0 1 1 .212-.977c.63.137 1.193.34 1.61.606.4.253.784.645.784 1.182 0 .402-.219.724-.483.958-.264.235-.618.423-1.013.57-.793.298-1.855.472-3.004.472s-2.21-.174-3.004-.471c-.395-.148-.749-.336-1.013-.571-.264-.234-.483-.556-.483-.958 0-.537.384-.929.783-1.182.418-.266.98-.47 1.611-.606a.5.5 0 0 1 .595.383z"></path>
+                </svg>
+                <b>Location:</b> <a href="https://www.google.com/maps/dir/Your+Location/{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}">{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-telephone" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M3.925 1.745a.636.636 0 0 0-.951-.059l-.97.97c-.453.453-.62 1.095-.421 1.658A16.47 16.47 0 0 0 5.49 10.51a16.471 16.471 0 0 0 6.196 3.907c.563.198 1.205.032 1.658-.421l.97-.97a.636.636 0 0 0-.06-.951l-2.162-1.682a.636.636 0 0 0-.544-.115l-2.052.513a1.636 1.636 0 0 1-1.554-.43L5.64 8.058a1.636 1.636 0 0 1-.43-1.554l.513-2.052a.636.636 0 0 0-.115-.544L3.925 1.745zM2.267.98a1.636 1.636 0 0 1 2.448.153l1.681 2.162c.309.396.418.913.296 1.4l-.513 2.053a.636.636 0 0 0 .167.604L8.65 9.654a.636.636 0 0 0 .604.167l2.052-.513a1.636 1.636 0 0 1 1.401.296l2.162 1.681c.777.604.849 1.753.153 2.448l-.97.97c-.693.693-1.73.998-2.697.658a17.47 17.47 0 0 1-6.571-4.144A17.47 17.47 0 0 1 .639 4.646c-.34-.967-.035-2.004.658-2.698l.97-.969z"></path>
+                </svg>
+                <b>Phone:</b> <a href="tel:{{[Phone]}}">{{[Phone]}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-envelope-open" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M8.47 1.318a1 1 0 0 0-.94 0l-6 3.2A1 1 0 0 0 1 5.4v.818l5.724 3.465L8 8.917l1.276.766L15 6.218V5.4a1 1 0 0 0-.53-.882l-6-3.2zM15 7.388l-4.754 2.877L15 13.117v-5.73zm-.035 6.874L8 10.083l-6.965 4.18A1 1 0 0 0 2 15h12a1 1 0 0 0 .965-.738zM1 13.117l4.754-2.852L1 7.387v5.73zM7.059.435a2 2 0 0 1 1.882 0l6 3.2A2 2 0 0 1 16 5.4V14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V5.4a2 2 0 0 1 1.059-1.765l6-3.2z"></path>
+                </svg>
+                <b>Email:</b> <a href="mailto:{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}">{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil-square" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path>
+                  <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
+                </svg>
+                <b>Comments:</b>
                   <div>
                     {{#each comments as | comment |}}
-                    <span>[{{comment.[0]}}] {{comment.[2]}} -- {{comment.[1]}}</span>
-                      <br>
+                    <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
                     {{/each}}
                   </div>
               </div>
@@ -448,7 +524,7 @@ a:hover {
         {{#readyForFostersData}}
         <div class="col-md-4">
           <div class="card mb-4 shadow-sm">
-            <div id={{entryId}} onclick="openImagesModal(this, true)">
+            <div id={{entryId}} onclick="openImagesModal(this, true)" class="card-img-container">
               {{#if images.[0]}}
                   <img src="{{images.[0]}}" style='width: 100%; height:250px; color:#eceeef; object-fit: scale-down' class="card-img-top">
               {{else}}
@@ -456,28 +532,49 @@ a:hover {
               {{/if}}
             </div>
             <div class="card-body">
-              <div style="margin: 1em 0 2em 0;">
-                <small class="text-muted">Date Submitted: {{[submittedOn]}}</small>
-              </div>
               <div>
-                👤 Name: {{[Name]}}
-              </div>
-              <div>
-                📍 Location: <a href="https://www.google.com/maps/dir/Your+Location/{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}">{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}</a>
                 <h3>{{[Intake Title]}}</h3>
               </div>
-              <div>
-                📞 Phone: <a href="tel:{{[Phone]}}">{{[Phone]}}</a>
+              <div style="margin: 1em 0 1em 0;">
+                <small class="text-muted">Date Submitted: {{[submittedOn]}}</small>
               </div>
-              <div>
-                📧 Email: <a href="mailto:{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}">{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}</a>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"></path>
+                  <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+                  <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path>
+                </svg>
+                <b>Name:</b> {{[Name]}}
               </div>
-              <div>
-                Comments:
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-geo" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 4a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
+                  <path d="M7.5 4h1v9a.5.5 0 0 1-1 0V4z"></path>
+                  <path fill-rule="evenodd" d="M6.489 12.095a.5.5 0 0 1-.383.594c-.565.123-1.003.292-1.286.472-.302.192-.32.321-.32.339 0 .013.005.085.146.21.14.124.372.26.701.382.655.246 1.593.408 2.653.408s1.998-.162 2.653-.408c.329-.123.56-.258.701-.382.14-.125.146-.197.146-.21 0-.018-.018-.147-.32-.339-.283-.18-.721-.35-1.286-.472a.5.5 0 1 1 .212-.977c.63.137 1.193.34 1.61.606.4.253.784.645.784 1.182 0 .402-.219.724-.483.958-.264.235-.618.423-1.013.57-.793.298-1.855.472-3.004.472s-2.21-.174-3.004-.471c-.395-.148-.749-.336-1.013-.571-.264-.234-.483-.556-.483-.958 0-.537.384-.929.783-1.182.418-.266.98-.47 1.611-.606a.5.5 0 0 1 .595.383z"></path>
+                </svg>
+                <b>Location:</b> <a href="https://www.google.com/maps/dir/Your+Location/{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}">{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-telephone" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M3.925 1.745a.636.636 0 0 0-.951-.059l-.97.97c-.453.453-.62 1.095-.421 1.658A16.47 16.47 0 0 0 5.49 10.51a16.471 16.471 0 0 0 6.196 3.907c.563.198 1.205.032 1.658-.421l.97-.97a.636.636 0 0 0-.06-.951l-2.162-1.682a.636.636 0 0 0-.544-.115l-2.052.513a1.636 1.636 0 0 1-1.554-.43L5.64 8.058a1.636 1.636 0 0 1-.43-1.554l.513-2.052a.636.636 0 0 0-.115-.544L3.925 1.745zM2.267.98a1.636 1.636 0 0 1 2.448.153l1.681 2.162c.309.396.418.913.296 1.4l-.513 2.053a.636.636 0 0 0 .167.604L8.65 9.654a.636.636 0 0 0 .604.167l2.052-.513a1.636 1.636 0 0 1 1.401.296l2.162 1.681c.777.604.849 1.753.153 2.448l-.97.97c-.693.693-1.73.998-2.697.658a17.47 17.47 0 0 1-6.571-4.144A17.47 17.47 0 0 1 .639 4.646c-.34-.967-.035-2.004.658-2.698l.97-.969z"></path>
+                </svg>
+                <b>Phone:</b> <a href="tel:{{[Phone]}}">{{[Phone]}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-envelope-open" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M8.47 1.318a1 1 0 0 0-.94 0l-6 3.2A1 1 0 0 0 1 5.4v.818l5.724 3.465L8 8.917l1.276.766L15 6.218V5.4a1 1 0 0 0-.53-.882l-6-3.2zM15 7.388l-4.754 2.877L15 13.117v-5.73zm-.035 6.874L8 10.083l-6.965 4.18A1 1 0 0 0 2 15h12a1 1 0 0 0 .965-.738zM1 13.117l4.754-2.852L1 7.387v5.73zM7.059.435a2 2 0 0 1 1.882 0l6 3.2A2 2 0 0 1 16 5.4V14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V5.4a2 2 0 0 1 1.059-1.765l6-3.2z"></path>
+                </svg>
+                <b>Email:</b> <a href="mailto:{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}">{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil-square" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path>
+                  <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
+                </svg>
+                <b>Comments:</b>
                   <div>
                     {{#each comments as | comment |}}
-                    <span>[{{comment.[0]}}] {{comment.[2]}} -- {{comment.[1]}}</span>
-                      <br>
+                    <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
                     {{/each}}
                   </div>
               </div>
@@ -512,7 +609,7 @@ a:hover {
         {{#completedData}}
         <div class="col-md-4">
           <div class="card mb-4 shadow-sm">
-            <div id={{entryId}} onclick="openImagesModal(this, true)">
+            <div id={{entryId}} onclick="openImagesModal(this, true)" class="card-img-container">
               {{#if images.[0]}}
                   <img src="{{images.[0]}}" style='width: 100%; height:250px; color:#eceeef; object-fit: scale-down' class="card-img-top">
               {{else}}
@@ -520,28 +617,49 @@ a:hover {
               {{/if}}
             </div>
             <div class="card-body">
-              <div style="margin: 1em 0 2em 0;">
-                <small class="text-muted">Date Submitted: {{[submittedOn]}}</small>
-              </div>
               <div>
-                👤 Name: {{[Name]}}
-              </div>
-              <div>
-                📍 Location: <a href="https://www.google.com/maps/dir/Your+Location/{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}">{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}</a>
                 <h3>{{[Intake Title]}}</h3>
               </div>
-              <div>
-                📞 Phone: <a href="tel:{{[Phone]}}">{{[Phone]}}</a>
+              <div style="margin: 1em 0 1em 0;">
+                <small class="text-muted">Date Submitted: {{[submittedOn]}}</small>
               </div>
-              <div>
-                📧 Email: <a href="mailto:{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}">{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}</a>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"></path>
+                  <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+                  <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path>
+                </svg>
+                <b>Name:</b> {{[Name]}}
               </div>
-              <div>
-                Comments:
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-geo" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 4a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
+                  <path d="M7.5 4h1v9a.5.5 0 0 1-1 0V4z"></path>
+                  <path fill-rule="evenodd" d="M6.489 12.095a.5.5 0 0 1-.383.594c-.565.123-1.003.292-1.286.472-.302.192-.32.321-.32.339 0 .013.005.085.146.21.14.124.372.26.701.382.655.246 1.593.408 2.653.408s1.998-.162 2.653-.408c.329-.123.56-.258.701-.382.14-.125.146-.197.146-.21 0-.018-.018-.147-.32-.339-.283-.18-.721-.35-1.286-.472a.5.5 0 1 1 .212-.977c.63.137 1.193.34 1.61.606.4.253.784.645.784 1.182 0 .402-.219.724-.483.958-.264.235-.618.423-1.013.57-.793.298-1.855.472-3.004.472s-2.21-.174-3.004-.471c-.395-.148-.749-.336-1.013-.571-.264-.234-.483-.556-.483-.958 0-.537.384-.929.783-1.182.418-.266.98-.47 1.611-.606a.5.5 0 0 1 .595.383z"></path>
+                </svg>
+                <b>Location:</b> <a href="https://www.google.com/maps/dir/Your+Location/{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}">{{#if [Location of cat(s), if different than your address]}}{{[Location of cat(s), if different than your address]}}{{else}}{{[Address]}}{{/if}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-telephone" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M3.925 1.745a.636.636 0 0 0-.951-.059l-.97.97c-.453.453-.62 1.095-.421 1.658A16.47 16.47 0 0 0 5.49 10.51a16.471 16.471 0 0 0 6.196 3.907c.563.198 1.205.032 1.658-.421l.97-.97a.636.636 0 0 0-.06-.951l-2.162-1.682a.636.636 0 0 0-.544-.115l-2.052.513a1.636 1.636 0 0 1-1.554-.43L5.64 8.058a1.636 1.636 0 0 1-.43-1.554l.513-2.052a.636.636 0 0 0-.115-.544L3.925 1.745zM2.267.98a1.636 1.636 0 0 1 2.448.153l1.681 2.162c.309.396.418.913.296 1.4l-.513 2.053a.636.636 0 0 0 .167.604L8.65 9.654a.636.636 0 0 0 .604.167l2.052-.513a1.636 1.636 0 0 1 1.401.296l2.162 1.681c.777.604.849 1.753.153 2.448l-.97.97c-.693.693-1.73.998-2.697.658a17.47 17.47 0 0 1-6.571-4.144A17.47 17.47 0 0 1 .639 4.646c-.34-.967-.035-2.004.658-2.698l.97-.969z"></path>
+                </svg>
+                <b>Phone:</b> <a href="tel:{{[Phone]}}">{{[Phone]}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-envelope-open" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M8.47 1.318a1 1 0 0 0-.94 0l-6 3.2A1 1 0 0 0 1 5.4v.818l5.724 3.465L8 8.917l1.276.766L15 6.218V5.4a1 1 0 0 0-.53-.882l-6-3.2zM15 7.388l-4.754 2.877L15 13.117v-5.73zm-.035 6.874L8 10.083l-6.965 4.18A1 1 0 0 0 2 15h12a1 1 0 0 0 .965-.738zM1 13.117l4.754-2.852L1 7.387v5.73zM7.059.435a2 2 0 0 1 1.882 0l6 3.2A2 2 0 0 1 16 5.4V14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V5.4a2 2 0 0 1 1.059-1.765l6-3.2z"></path>
+                </svg>
+                <b>Email:</b> <a href="mailto:{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}">{{#if [Email Address]}}{{[Email Address]}}{{else}}{{[Email]}}{{/if}}</a>
+              </div>
+              <div class="card-body-element">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil-square" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path>
+                  <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
+                </svg>
+                <b>Comments:</b>
                   <div>
                     {{#each comments as | comment |}}
-                    <span>[{{comment.[0]}}] {{comment.[2]}} -- {{comment.[1]}}</span>
-                      <br>
+                    <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
                     {{/each}}
                   </div>
               </div>
