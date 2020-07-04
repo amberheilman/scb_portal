@@ -184,7 +184,8 @@ function updateSheetRow(updateData, updateRange){
         $('#saveContactButton').hide();
         $('.formInput').prop("readonly", true);
         $('#uploadWidget').prop("disabled", true);
-        $('.formDropdown').prop("disabled", true);
+
+        $('#intakeStatus, #intakeTitle').prop("disabled", true);
         $('#editContactButton').text("Edit");
         getSheetData()
 
@@ -197,7 +198,7 @@ function updateSheetRow(updateData, updateRange){
       $('#saveContactButton').hide();
       $('.formInput').prop("readonly", true);
       $('#uploadWidget').prop("disabled", true);
-      $('.formDropdown').prop("disabled", true);
+      $('#intakeStatus, #intakeTitle').prop("disabled", true);
       $('#editContactButton').text("Edit");
   });
 }
@@ -248,6 +249,7 @@ function openMoreModal(buttonInfo, isCompleted){
 $('#detailsModal').on('show.bs.modal', function (event) {
   var modal = $(this);
   modal.find('#moreInfoContainer')[0].innerHTML = '';
+  $("#intakeTitle").val(currentRowData['Intake Title']);
   $("#intakeStatus").val(currentRowData['Intake Status']);
   for (let detail in currentRowData) {
     if (!["sheetIndex", "images", "comments", "entryId", "Intake Status",
@@ -306,8 +308,9 @@ $('#detailsModal').on('hidden.bs.modal', function (event) {
   var modal = $(this)
   modal.find('#comments').empty();
   modal.find('#modalImages').empty();
+  $('#intakeTitle').empty();
   $('.formInput').prop("readonly", true);
-  $('.formDropdown').prop("disabled", true);
+  $('#intakeStatus, #intakeTitle').prop("disabled", true);
   $('#uploadWidget').addClass("disable-div");
   $('#moreInfoButton').text("Show More");
   $('#editContactButton').text("Edit");
@@ -397,7 +400,7 @@ function resetImagesPreviews() {
 
 function editIntakeStatus(){
     if($('#editContactButton')[0].innerText == "Edit"){
-        $('.formDropdown').prop('disabled', false);
+        $('#intakeStatus, #intakeTitle').prop('disabled', false);
         $('#uploadWidget').removeClass("disable-div");
         $('#editContactButton').text("Cancel Edit");
         $('#saveContactButton').show();
@@ -407,7 +410,7 @@ function editIntakeStatus(){
     else {
         document.getElementById("uploadWidget").removeEventListener("click", handleImageUploadClick);
         $('#uploadWidget').addClass('disable-div');
-        $('.formDropdown').prop('disabled', true);
+        $('#intakeStatus, #intakeTitle').prop('disabled', true);
         $('#editContactButton').text("Edit");
         $('#saveContactButton').hide();
         $('.delete').hide();
@@ -422,7 +425,7 @@ function saveIntakeStatus(){
   formData.forEach(entry => {
     formDataObj[entry.name] = entry.value;
   })
-  let formDataArray = [formDataObj['imageURLs'], formDataObj['Intake Status']];
+  let formDataArray = [formDataObj['imageURLs'], formDataObj['Intake Status'], formDataObj['intakeTitle']];
   // currentRowData["headers"].forEach(header => {
   //   if (!["Timestamp"].includes(header)) {
   //     if (formDataObj[header] || formDataObj[header] == "") {
@@ -433,7 +436,7 @@ function saveIntakeStatus(){
   //   }
   // })
 
-  let updateRange = `AK${currentRowData.sheetIndex}:AL${currentRowData.sheetIndex}`
+  let updateRange = `AK${currentRowData.sheetIndex}:AM${currentRowData.sheetIndex}`
   console.log(formData);
   console.log(updateRange);
   updateSheetRow(formDataArray, updateRange)
