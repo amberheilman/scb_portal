@@ -282,6 +282,8 @@ $('#detailsModal').on('show.bs.modal', function (event) {
     $('#deleteButton').hide();
   }
 
+  $('#commentUserName').val(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName());
+
   //get comments
   if(currentRowData.comments.length > 0){
     currentRowData.comments.forEach(comment => {
