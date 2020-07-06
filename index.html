@@ -744,12 +744,659 @@ svg {
             });
            });
            }
-        });
+        })
       });
     </script>
     <script async defer src="https://apis.google.com/js/api.js"
       onload="this.onload=function(){};handleClientLoad()"
       onreadystatechange="if (this.readyState === 'complete') this.onload()">
     </script>
+    <script>
+const intakeSheetName = "Sheet1";
+
+
+function displayError(message) {
+  var pre = document.getElementById('error');
+  var textContent = document.createTextNode(message + '\n');
+  pre.appendChild(textContent);
+}
+
+function createRowObject(headers, row){
+  let rowObject = {};
+  for (let i= 0; i < headers.length; i++) {
+    rowObject[headers[i]] = row[i];
+  }
+  if (!headers.includes('Intake Status')) {
+    headers.push('Intake Status')
+  }
+  if (!rowObject['Intake Status']) {
+    rowObject['Intake Status'] = 'new';
+  }
+  if (!rowObject['Timestamp']) {
+    rowObject['entryId'] = new Date(rowObject['Submitted On']).getTime();
+    rowObject['submittedOn'] = new Date(rowObject['Submitted On']);
+  } else {
+    rowObject['entryId'] = new Date(rowObject['Timestamp']).getTime();
+    rowObject['submittedOn'] = new Date(rowObject['Timestamp']);
+  }
+  rowObject['comments'] = [];
+  rowObject['images'] = [];
+  rowObject['headers'] = headers;
+  rowObject['Summary'] = "";
+
+  for (let i= 0; i < headers.length; i++) {
+      if (headers[i] == 'Intake Status') { continue; }
+      if (headers[i] == 'Images' && row[i]) {
+        rowObject['Summary'] += headers[i] + '%0A%20%20%20%20' + row[i].split("\n").join("%0A%0A%20%20%20%20") + '%0A%0A';
+      } else {
+        rowObject['Summary'] += headers[i] + '%0A%20%20%20%20' + row[i] + '%0A%0A';
+      }
+  }
+  return rowObject;
+}
+
+function getSheetData() {
+  gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: intakeSheetId,
+    range: intakeSheetName,
+  }).then(function(response) {
+    var range = response.result;
+    if (range.values.length > 0) {
+      parseSheetData(range);
+    } else {
+      displayError('No data found.');
+    }
+  }, function(response) {
+    displayError('Error: ' + response.result.error.message);
+  });
+}
+
+function parseSheetData(response){
+  let headers = response.values[0];
+  response.values.shift();
+  let sheetData = response.values;
+
+  let rowDataObjectArray = [];
+
+  //start counting at '2' since the first non-header row of Google sheet is at index 2
+  let rowCounter = 2;
+  sheetData.forEach(row => {
+    if(row.length > 0){
+      let newRow = createRowObject(headers, row);
+      newRow.sheetIndex = rowCounter;
+      rowDataObjectArray.push(newRow);
+    }
+
+    rowCounter++;
+  })
+  rowDataObjectArray = rowDataObjectArray.reverse();
+  globalSheetData = rowDataObjectArray;
+  getCommentData(rowDataObjectArray);
+}
+
+function getCommentData(sheetData){
+  gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: commentSheetId,
+    range: 'Form Responses 1',
+  }).then(function(response) {
+    var range = response.result;
+
+    if (range.values.length > 0) {
+      range.values.shift(); //remove headers from data
+
+      let index = 2;
+      range.values.forEach(comment => {
+
+        let rowEntry = sheetData.find(x => x.entryId == comment[4]);
+        if(rowEntry){
+          comment.sheetIndex = index;
+          rowEntry.comments.push(comment);
+        }
+        index++;
+      })
+    }
+    getImageData(sheetData)
+  }, function(response) {
+    displayError('Error: ' + response.result.error.message);
+    getImageData(sheetData)
+  });
+}
+
+function getImageData(sheetData){
+  sheetData.forEach(row => {
+            let imageURLs = row['Images'];
+            if (imageURLs) {
+              imageURLs.split("\n").forEach(url => {
+                if (url != "" && url.startsWith('http')) {
+                  row.images.push(url)
+                }
+              })
+            }
+  })
+  //form data for handlebars
+  readyHandlebars(sheetData);
+}
+
+
+function readyHandlebars(data){
+
+  let groupedByStatus = _.groupBy(data, function(entry){
+    return entry['Intake Status']
+  });
+
+  var newEntrySource = document.getElementById("newEntryDataTemplate").innerHTML;
+  var newEntryTemplate = Handlebars.compile(newEntrySource);
+  var newEntryData = { newEntryData: groupedByStatus["new"]};
+  var newEntryOutput = newEntryTemplate(newEntryData);
+  document.getElementById("newEntryData").innerHTML = newEntryOutput;
+
+  var needInfoSource = document.getElementById("needInfoDataTemplate").innerHTML;
+  var needInfoTemplate = Handlebars.compile(needInfoSource);
+  var needInfoData = { needsInfoData: groupedByStatus["needsInfo"]};
+  var needInfoOutput = needInfoTemplate(needInfoData);
+  document.getElementById("needInfoData").innerHTML = needInfoOutput;
+
+  var readyForFostersSource = document.getElementById("readyForFostersDataTemplate").innerHTML;
+  var readyForFostersTemplate = Handlebars.compile(readyForFostersSource);
+  var readyForFostersData = { readyForFostersData: groupedByStatus["ready"]};
+  var readyForFostersOutput = readyForFostersTemplate(readyForFostersData);
+  document.getElementById("readyForFostersData").innerHTML = readyForFostersOutput;
+
+  var completedSource = document.getElementById("completedDataTemplate").innerHTML;
+  var completedTemplate = Handlebars.compile(completedSource);
+  var completedData = { completedData: groupedByStatus["completed"]};
+  var completedOutput = completedTemplate(completedData);
+  document.getElementById("completedData").innerHTML = completedOutput;
+
+  let urlParams = new URLSearchParams(window.location.search);
+  let myParam = urlParams.get('tab');
+  $('#navTab a[href="#'+myParam+'Entries"]').tab('show')
+}
+
+function getRowData(id){
+  currentRowData = []; //clear row
+  let rowEntry = globalSheetData.find(x => x.entryId == id);
+  return rowEntry;
+}
+
+
+//used only for update form at the moment
+function updateSheetRow(updateData, updateRange){
+  let updateValues = [{
+      range: updateRange,
+      values: [updateData]
+  }]
+  gapi.client.sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId: intakeSheetId,
+      valueInputOption: 'RAW'
+      }, {'data': updateValues, }).then(function(response) {
+        $('#formMessage').text("Save successful")
+        $("#formMessage").show().delay(8000).queue(function (next) {
+            $(this).hide();
+            next();
+        });
+        $('#saveContactButton').hide();
+        $('.formInput').prop("readonly", true);
+        $('#uploadWidget').prop("disabled", true);
+
+        $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop("disabled", true);
+        $('#editContactButton').text("Edit");
+        getSheetData()
+
+  }, function(err) {
+      $('#formMessage').text("An error occurred, nothing was saved, please try again.")
+      $("#formMessage").show().delay(8000).queue(function (next) {
+          $(this).hide();
+          next();
+      });
+      $('#saveContactButton').hide();
+      $('.formInput').prop("readonly", true);
+      $('#uploadWidget').prop("disabled", true);
+      $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop("disabled", true);
+      $('#editContactButton').text("Edit");
+  });
+}
+
+// images modal
+
+function openImagesModal(buttonInfo) {
+  let rowData = getRowData(buttonInfo.id);
+
+  if(rowData == []){
+    //return error
+  }
+  else {
+    currentRowData = rowData;
+    $('#imagesModal').modal({show: true});
+  }
+}
+
+// on images modal show
+$('#imagesModal').on('show.bs.modal', function (event) {
+  var modal = $(this);
+  modal.find('#carouselIndicators')[0].innerHTML = '';
+  modal.find('#carouselInner')[0].innerHTML = '';
+  for (let i = 0; i < currentRowData.images.length; i++) {
+    let isActive = (i == 0 ) ? "active" : "";
+    modal.find('#carouselIndicators')[0].innerHTML += `
+        <li data-target="#carouselExampleIndicators" data-slide-to="${i}" class="${isActive}"></li>`;
+    modal.find('#carouselInner')[0].innerHTML += `
+              <div class="carousel-item ${isActive}">
+                <img class="d-block w-100 h-50" style="max-height: 1000px; object-fit: scale-down;" src="${currentRowData.images[i]}" alt="">
+              </div>`;
+  }
+});
+
+function openMoreModal(buttonInfo, isCompleted){
+  let rowData = getRowData(buttonInfo.id);
+
+  if(rowData == []){
+    //return error
+  }
+  else {
+    currentRowData = rowData;
+    $('#detailsModal').modal({show: true});
+  }
+}
+
+//on modal show
+$('#detailsModal').on('show.bs.modal', function (event) {
+  var modal = $(this);
+  modal.find('#moreInfoContainer')[0].innerHTML = '';
+  $("#intakeTitle").val(currentRowData['Intake Title']);
+  $("#intakeStatus").val(currentRowData['Intake Status']);
+  $('#intakeNeedsFoster').val(currentRowData['Intake Needs Foster']);
+  $('#intakeNeedsTrap').val(currentRowData['Intake Needs Trap']);
+  for (let detail in currentRowData) {
+    if (!["sheetIndex", "images", "comments", "entryId", "Intake Status",
+          "Images", "headers", "Summary"].includes(detail)) {
+      modal.find('#moreInfoContainer')[0].innerHTML += `
+              <div class="form-group" style="padding-bottom: 0.5em;">
+                <label for="{detail}">${detail}</label>
+                <p style="background-color: #e9ecef; padding: 0.5em; border-radius: 0.5em;" id="${detail}">${currentRowData[detail]}</p>
+              </div>`;
+    }
+  }
+  resetImagesPreviews();
+
+  $('#uploadWidget').addClass("disable-div");
+  $('#saveContactButton').hide();
+
+  $('#formMessage').hide();
+  $('#commentFormContainer').hide();
+
+  if(currentRowData['intakeStatus'] == "completed"){
+    $('#editContactButton').hide();
+    $('#imageButton').hide();
+    $('#commentButton').hide();
+    $('#deleteButton').show();
+  }
+  else {
+    $('#editContactButton').show();
+    $('#imageButton').show();
+    $('#commentButton').show();
+    $('#deleteButton').hide();
+  }
+
+  $('#commentUserName').val(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName());
+
+  //get comments
+  if(currentRowData.comments.length > 0){
+    currentRowData.comments.forEach(comment => {
+      modal.find('#comments').append('<p>'+ comment[0] + '<br>' + comment[2] + '<br> --' + comment[1] + '</p>')
+    })
+  }
+  else{
+     modal.find('#comments').append('<p> No comments yet </p>');
+  }
+
+  //get images
+  if(currentRowData.images.length > 0){
+    currentRowData.images.forEach(image => {
+      modal.find('#modalImages').append('<img src="' + image + '" style="width: 100%; height:250px; color:#eceeef" class="col-lg-6">')
+    })
+  }
+  else{
+     modal.find('#modalImages').append('<p> No images yet </p>');
+  }
+});
+
+//when modal hide
+$('#detailsModal').on('hidden.bs.modal', function (event) {
+  var modal = $(this);
+  modal.find('#comments').empty();
+  modal.find('#modalImages').empty();
+  $('#intakeTitle').empty();
+  $('#intakeNeedsFoster').empty();
+  $('#intakeNeedsTrap').empty();
+  $('.formInput').prop("readonly", true);
+  $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop("disabled", true);
+  $('#uploadWidget').addClass("disable-div");
+  $('#moreInfoButton').text("Show More");
+  $('#editContactButton').text("Edit");
+  $('#saveContactButton').hide();
+  $('#formMessage').hide()
+  $('#commentFormContainer').hide()
+  $('#commentUserName').val("");
+  $('#commentContent').val("");
+});
+
+function addComment(){
+  $('#commentFormContainer').show();
+  $('#commentButton').hide();
+}
+
+function cancelComment(){
+  $('#commentUserName').val("");
+  $('#commentContent').val("");
+  $('#commentFormContainer').hide();
+  $('#commentButton').show();
+}
+
+function saveComment(){
+
+  let formData = $('#commentForm').serializeArray();
+
+  let formDataObj = {}
+  formData.forEach(entry => {
+    formDataObj[entry.name] = entry.value;
+  })
+
+  let formDataArray = [];
+  formDataArray.push(new Date().toLocaleString());
+  formDataArray.push(formDataObj.commentUserName);
+  formDataArray.push(formDataObj.commentContent);
+  formDataArray.push(""); //empty for now, need to change sheet
+  formDataArray.push(currentRowData.entryId);
+
+  gapi.client.sheets.spreadsheets.values.append({
+    spreadsheetId: commentSheetId,
+    valueInputOption: 'RAW',
+    range: 'A1'
+    }, {'values': [formDataArray], }).then(function(response) {
+      $('#commentMessage').text("Comment saved successfully.");
+      $("#commentMessage").show().delay(8000).queue(function (next) {
+        $(this).hide();
+        next();
+        });
+      cancelComment();
+      getSheetData();
+
+  }, function(err) {
+        cancelComment();
+        $('#commentMessage').text("An error occurred, nothing was saved, please try again.")
+        $("#commentMessage").show().delay(8000).queue(function (next) {
+          $(this).hide();
+          next();
+          });
+  });
+}
+
+function handleImageUploadClick(event) {
+    cloudinary.createUploadWidget({
+      cloudName: '',
+      uploadPreset: '',
+      sources: ['local', 'camera']}, function(error, result) {
+        if (!error && result && result.event === "success") {
+            $("#intakeImages").append('<div><img src="' + result.info.secure_url + '" class="img-previews"></div>');
+            $('input[name="imageURLs"]').val( $('input[name="imageURLs"]').val() + result.info.secure_url + '\n');
+        }
+      }).open();
+}
+
+function resetImagesPreviews() {
+    $('#intakeImages')[0].innerHTML = '';
+    $('input[name="imageURLs"]').val('');
+    for (let i=0; i < currentRowData['images'].length; i++) {
+    if (currentRowData['images'][i] != "") {
+      $("#intakeImages").append('<div><img src="' + currentRowData['images'][i] + '" class="img-previews">' +
+          '<button id="imageDelete' + i + '" onclick="deleteImage(this, \'' + currentRowData['images'][i].trim() + '\')" type="button" class="delete close" aria-label="Delete">' +
+          '  <span aria-hidden="true">&times;</span>' +
+          '</button></div>');
+      $('input[name="imageURLs"]').val($('input[name="imageURLs"]').val() + currentRowData['images'][i] + '\n');
+    }
+  }
+}
+
+function editIntakeStatus(){
+    if($('#editContactButton')[0].innerText == "Edit"){
+        $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop('disabled', false);
+        $('#uploadWidget').removeClass("disable-div");
+        $('#editContactButton').text("Cancel Edit");
+        $('#saveContactButton').show();
+        $('.delete').show();
+        document.getElementById("uploadWidget").addEventListener("click", handleImageUploadClick, false);
+    }
+    else {
+        document.getElementById("uploadWidget").removeEventListener("click", handleImageUploadClick);
+        $('#uploadWidget').addClass('disable-div');
+        $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop('disabled', true);
+        $('#editContactButton').text("Edit");
+        $('#saveContactButton').hide();
+        $('.delete').hide();
+        resetImagesPreviews();
+    }
+}
+
+function saveIntakeStatus(){
+  let formData = $('#intakeStatusForm').serializeArray();
+
+  let formDataObj = {}
+  formData.forEach(entry => {
+    formDataObj[entry.name] = entry.value;
+  })
+  let formDataArray = [formDataObj['imageURLs'], formDataObj['Intake Status'],
+    formDataObj['intakeTitle'], formDataObj['intakeNeedsFoster'],
+        formDataObj['intakeNeedsTrap']];
+  // currentRowData["headers"].forEach(header => {
+  //   if (!["Timestamp"].includes(header)) {
+  //     if (formDataObj[header] || formDataObj[header] == "") {
+  //       formDataArray.push(formDataObj[header])
+  //     } else {
+  //       formDataArray.push(currentRowData[header])
+  //     }
+  //   }
+  // })
+
+  let updateRange = `AK${currentRowData.sheetIndex}:AM${currentRowData.sheetIndex}`
+  console.log(formData);
+  console.log(updateRange);
+  updateSheetRow(formDataArray, updateRange)
+
+}
+
+// function editForm(){
+//     if($('#editContactButton')[0].innerText == "Edit"){
+//         $('.formInput').prop('readonly', false);
+//         $('.formDropdown').prop('disabled', false);
+//         $('#editContactButton').text("Cancel Edit");
+//         $('#saveContactButton').show();
+//     }
+//     else{
+//         $('.formInput').prop('readonly', true);
+//         $('.formDropdown').prop('disabled', true);
+//         $('#editContactButton').text("Edit");
+//         $('#saveContactButton').hide();
+//     }
+// }
+//
+// function saveForm(){
+//   let formData = $('#moreInfoContainer').serializeArray();
+//
+//   let formDataObj = {}
+//   formData.forEach(entry => {
+//     formDataObj[entry.name] = entry.value;
+//   })
+//   let formDataArray = [];
+//   currentRowData["headers"].forEach(header => {
+//     if (!["Timestamp"].includes(header)) {
+//       if (formDataObj[header] || formDataObj[header] == "") {
+//         formDataArray.push(formDataObj[header])
+//       } else {
+//         formDataArray.push(currentRowData[header])
+//       }
+//     }
+//   })
+//
+//   let updateRange = `B${currentRowData.sheetIndex}`
+//   console.log(formDataArray);
+//   console.log(updateRange);
+//   updateSheetRow(formDataArray, updateRange)
+//
+// }
+
+//delete entries
+function deleteComments(){
+
+  let rangesToDelete = currentRowData.comments.map(row => {
+    return `A${row.sheetIndex}:ZZ${row.sheetIndex}`;
+  });
+
+  gapi.client.sheets.spreadsheets.values.batchClear({
+    spreadsheetId: commentSheetId,
+  }, { ranges: rangesToDelete}).then(function(response) {
+     console.log(response);
+
+  }, function(err) {
+      console.log(err)
+  });
+}
+
+function deleteImage(buttonElem, url){
+    console.log(url);
+    $('input[name="imageURLs"]').val($('input[name="imageURLs"]').val().replace(url, ''));
+    $(buttonElem).parent().fadeOut();
+}
+
+
+//unused but could be useful later
+// function updateSheetCell(updateData, updateRange) {
+//   gapi.client.sheets.spreadsheets.values.update({
+//     spreadsheetId: '1pFovhJ2zqoRvjsHiAwa5OIrYLnRXAMtlAcVXoxacp8E',
+//     range: updateRange,
+//     valueInputOption: 'RAW'
+//   }, {values: [[updateData]]}).then(function(response) {
+//       console.log(response);
+
+//   }, function(err) {
+//       console.log(err)
+//     // displayError('Error: ' + response.result.error.message);
+//   });
+// }
+
+// function updateEntryComments(entryId){
+//   gapi.client.sheets.spreadsheets.values.get({
+//     spreadsheetId: '1RwiQ3sI31swWW-oATinxsaGiCuhK4vfMzZoe-CnJZ1Q',
+//     range: 'Form Responses 1',
+//   }).then(function(response) {
+//     var range = response.result;
+//     if (range.values.length > 0) {
+//       range.values.shift(); //remove headers from data
+//       currentRowData.comments = [];
+//       range.values.forEach(comment => {
+//         if(comment[4] == entryId){
+//           currentRowData.comments.push(comment)
+//         }
+//       })
+
+
+//       $('#detailsModal').modal('hide');
+//       $('#detailsModal').modal('show');
+
+//       // console.log(currentRowData.comments)
+//       // currentRowData.comments.forEach(comment => {
+//       // $('#comments').append('<p>'+ comment[0] + '<br>' + comment[2] + '<br>' + comment[1] + '</p>')
+//       // })
+//     }
+//   }, function(response) {
+//     console.log(response)
+//   });
+// }
+  </script>
+    <script>
+    // Client ID and API key from the Developer Console
+var CLIENT_ID = '';
+var API_KEY = '';
+
+// Array of API discovery doc URLs for APIs used by the quickstart
+var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4", "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+
+// Authorization scopes required by the API; multiple scopes can be
+// included, separated by spaces.
+var SCOPES = "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file";
+
+var authorizeButton = document.getElementById('authorize_button');
+var signoutButton = document.getElementById('signout_button');
+var unauthorizedBlock= document.getElementById('unauthorizedBlock');
+var authorizedBlock= document.getElementById('authorizedBlock');
+
+let globalSheetData = {}; //local copy of intake form
+let currentRowData = []; //local copy of current entry seen in modal
+
+const intakeSheetId = "";
+const commentSheetId = "";
+
+/**
+ *  On load, called to load the auth2 library and API client library.
+ */
+function handleClientLoad() {
+  gapi.load('client:auth2', initClient);
+}
+
+/**
+ *  Initializes the API client library and sets up sign-in state
+ *  listeners.
+ */
+function initClient() {
+  gapi.client.init({
+    apiKey: API_KEY,
+    clientId: CLIENT_ID,
+    discoveryDocs: DISCOVERY_DOCS,
+    scope: SCOPES
+  }).then(function () {
+    // Listen for sign-in state changes.
+    gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+
+    // Handle the initial sign-in state.
+    updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+    authorizeButton.onclick = handleAuthClick;
+    signoutButton.onclick = handleSignoutClick;
+
+  }, function(error) {
+    displayError(JSON.stringify(error, null, 2));
+  });
+}
+
+/**
+ *  Called when the signed in status changes, to update the UI
+ *  appropriately. After a sign-in, the API is called.
+ */
+function updateSigninStatus(isSignedIn) {
+  if (isSignedIn) {
+    unauthorizedBlock.style.display = "none";
+    authorizedBlock.style.display = "block";
+    document.getElementById("authorizedBlock").prepend("Hi, " + gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName() + "!");
+    getSheetData();
+  } else {
+    unauthorizedBlock.style.display = "block";
+    authorizedBlock.style.display = "none";
+  }
+}
+
+/**
+ *  Sign in the user upon button click.
+ */
+function handleAuthClick(event) {
+  gapi.auth2.getAuthInstance().signIn();
+}
+
+/**
+ *  Sign out the user upon button click.
+ */
+function handleSignoutClick(event) {
+  gapi.auth2.getAuthInstance().signOut();
+  $( "#mainContainer" ).empty();
+}
+  </script>
   </body>
 </html>
