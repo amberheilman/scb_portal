@@ -8,10 +8,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <style>
 body {
-  /*font-family: sans-serif;*/
-  /*font-family: Ubuntu;*/
-  /*font-size: 15px;*/
-  /*line-height: 20px;*/
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
   font-size: 1rem;
   font-weight: 400;
@@ -26,6 +22,9 @@ a:hover {
 }
 svg {
   vertical-align: text-top;
+}
+h3 {
+  font-size: 1.5rem;
 }
 .btn{
   color: white;
@@ -168,6 +167,38 @@ svg {
   margin: 0.5em;
   padding: 0.5em;
 }
+.mini-button {
+  font-size: 15px;
+}
+.moreInfoBtn-container {
+  margin: 1em 0 1em 0;
+}
+.foster-claim-button, .foster-claim-button:hover {
+  background-color: #00b9fffa;
+  border-color: #06a8e4fa;
+  box-shadow: 0 2px 0 0 #06a8e4fa;
+}
+.foster-claim-button-active, .foster-claim-button-active:hover {
+  background-color: #00b9ff29;
+  border-color: #06a8e4fa;
+  box-shadow: none;
+  color: black;
+}
+.trap-claim-button, .trap-claim-button:hover {
+  background-color: #ff4804bf;
+  border-color: coral;
+  box-shadow: 0 2px 0 0 #FF5722;
+}
+.trap-claim-button-active, .trap-claim-button-active:hover {
+  background-color: #ff7f5017;
+  border: 1px solid coral;
+  box-shadow: none;
+  color: black;
+}
+.read-more-link {
+  margin: 0.5em;
+  padding: 0.5em;
+}
 @media all and (max-width: 500px) {
   .search {
     margin-top: 2em;
@@ -248,7 +279,11 @@ svg {
       </div>
       <div class="modal-body">
         <div id="modalDetailContainer">
-          <h4>Details</h4>
+          <h4>Notify</h4>
+          <div id="notify-container" class="d-flex align-items-center">
+            <!-- mailto links dynamically inserted here -->
+          </div>
+          <h4>Intake Information</h4>
           <form id="intakeStatusForm" style="padding-bottom: 0.5em; padding-top: 0.5em">
            <!-- form fields are dynamically inserted here -->
              <div class="form-group  mb-2 mr-sm-2">
@@ -259,13 +294,13 @@ svg {
                <label for="taskList">What tasks are required?</label>
                <div id="taskList">
                  <div class="form-check">
-                   <input class="form-check-input" type="checkbox" value="" id="intakeNeedsFoster" disabled="" name="intakeNeedsFoster" checked>
+                   <input class="form-check-input" type="checkbox" id="intakeNeedsFoster" disabled="" name="intakeNeedsFoster">
                    <label class="form-check-label" for="intakeNeedsFoster">
                      Needs fostering
                    </label>
                  </div>
                  <div class="form-check">
-                   <input class="form-check-input" type="checkbox" value="" id="intakeNeedsTrap" disabled="" name="intakeNeedsTrap">
+                   <input class="form-check-input" type="checkbox" id="intakeNeedsTrap" disabled="" name="intakeNeedsTrap">
                    <label class="form-check-label" for="intakeNeedsTrap">
                      Needs trapping
                    </label>
@@ -295,6 +330,7 @@ svg {
                 </div>
           </form>
             <!-- hidden on load-->
+          <h4>Details</h4>
           <div id="moreInfoContainer">
           </div>
         </div>
@@ -421,25 +457,22 @@ svg {
                   <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
                 </svg>
                 <b>Comments:</b>
-                  <div>
-                    {{#each comments as | comment |}}
-                    <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
-                    {{/each}}
-                  </div>
+                  {{#if shortComments}}
+                    <div>
+                      {{#each shortComments as | comment |}}
+                      <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
+                      {{/each}}
+                    </div>
+                    <a href="#" onclick="openMoreModal({{entryId}}, '#modalCommentContainer');" class="read-more-link"><small>View All Comments</small></a>
+                  {{else}}
+                   <small>N/A</small>
+                  {{/if}}
               </div>
-              <div style="margin: 1em 0 1em 0;" class="d-flex justify-content-between align-items-center row">
+              <div class="d-flex justify-content-between align-items-center row moreInfoBtn-container">
                 <div class="btn-group col-12">
-                  <button id={{entryId}} type="button" class="btn btn-sm moreInfoBtn" onclick="openMoreModal(this)">More Info</button>
+                  <button id={{entryId}} type="button" class="btn btn-sm moreInfoBtn" onclick="openMoreModal({{entryId}})">More Info</button>
                   <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
                 </div>
-              </div>
-              <div class="d-flex justify-content-around align-items-center row">
-                <a href="mailto:fosterswithscbi@straycatbluesinc.org?subject={{#if [Title]}}{{[Title]}}{{else}}New Foster Request!{{/if}}&body={{[Summary]}}">
-                  <button id="emailFosters" class="transparent-btn btn sqs-block-button-element--small">Email Fosters</button>
-                </a>
-                <a href="mailto:tnrtrappers@straycatbluesinc.org?subject={{#if [Title]}}{{[Title]}}{{else}}New Trapping Request!{{/if}}&body={{[Summary]}}">
-                  <button id="emailTrappers" class="transparent-btn btn sqs-block-button-element--small">Email Trappers</button>
-                </a>
               </div>
             </div>
           </div>
@@ -505,25 +538,22 @@ svg {
                   <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
                 </svg>
                 <b>Comments:</b>
-                  <div>
-                    {{#each comments as | comment |}}
-                    <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
-                    {{/each}}
-                  </div>
+                  {{#if shortComments}}
+                    <div>
+                      {{#each shortComments as | comment |}}
+                      <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
+                      {{/each}}
+                    </div>
+                    <a href="#" onclick="openMoreModal({{entryId}}, '#modalCommentContainer');" class="read-more-link"><small>View All Comments</small></a>
+                  {{else}}
+                   <small>N/A</small>
+                  {{/if}}
               </div>
-              <div style="margin: 1em 0 1em 0;" class="d-flex justify-content-between align-items-center row">
+              <div class="d-flex justify-content-between align-items-center row moreInfoBtn-container">
                 <div class="btn-group col-12">
-                  <button id={{entryId}} type="button" class="btn btn-sm moreInfoBtn" onclick="openMoreModal(this)">More Info</button>
+                  <button id={{entryId}} type="button" class="btn btn-sm moreInfoBtn" onclick="openMoreModal({{entryId}})">More Info</button>
                   <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
                 </div>
-              </div>
-              <div class="d-flex justify-content-around align-items-center row">
-                <a href="mailto:fosterswithscbi@straycatbluesinc.org?subject={{#if [Title]}}{{[Title]}}{{else}}New Foster Request!{{/if}}&body={{[Summary]}}">
-                  <button id="emailFosters" class="transparent-btn btn sqs-block-button-element--small">Email Fosters</button>
-                </a>
-                <a href="mailto:tnrtrappers@straycatbluesinc.org?subject={{#if [Title]}}{{[Title]}}{{else}}New Trapping Request!{{/if}}&body={{[Summary]}}">
-                  <button id="emailTrappers" class="transparent-btn btn sqs-block-button-element--small">Email Trappers</button>
-                </a>
               </div>
             </div>
           </div>
@@ -589,26 +619,61 @@ svg {
                   <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
                 </svg>
                 <b>Comments:</b>
-                  <div>
-                    {{#each comments as | comment |}}
-                    <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
-                    {{/each}}
-                  </div>
+                  {{#if shortComments}}
+                    <div>
+                      {{#each shortComments as | comment |}}
+                      <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
+                      {{/each}}
+                    </div>
+                    <a href="#" onclick="openMoreModal({{entryId}}, '#modalCommentContainer');" class="read-more-link"><small>View All Comments</small></a>
+                  {{else}}
+                   <small>N/A</small>
+                  {{/if}}
               </div>
-              <div style="margin: 1em 0 1em 0;" class="d-flex justify-content-between align-items-center row">
+              <div class="d-flex justify-content-between align-items-center row moreInfoBtn-container">
                 <div class="btn-group col-12">
-                  <button id={{entryId}} type="button" class="btn btn-sm moreInfoBtn" onclick="openMoreModal(this)">More Info</button>
+                  <button id={{entryId}} type="button" class="btn btn-sm moreInfoBtn" onclick="openMoreModal({{entryId}})">More Info</button>
                   <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
                 </div>
               </div>
-              <div class="d-flex justify-content-around align-items-center row">
-                <a href="mailto:fosterswithscbi@straycatbluesinc.org?subject={{#if [Title]}}{{[Title]}}{{else}}New Foster Request!{{/if}}&body={{[Summary]}}">
-                  <button id="emailFosters" class="transparent-btn btn sqs-block-button-element--small">Email Fosters</button>
-                </a>
-                <a href="mailto:tnrtrappers@straycatbluesinc.org?subject={{#if [Title]}}{{[Title]}}{{else}}New Trapping Request!{{/if}}&body={{[Summary]}}">
-                  <button id="emailTrappers" class="transparent-btn btn sqs-block-button-element--small">Email Trappers</button>
-                </a>
-              </div>
+                {{#if [Intake Needs Foster]}}
+                  <hr>
+                {{/if}}
+              {{#if [Intake Needs Trap]}}
+                <div class="d-flex justify-content-between align-items-center row moreInfoBtn-container">
+                  <div class="btn-group col-12">
+                    {{#if [Intake Trapper]}}
+                      <button id="trapClaimButton" type="button" class="btn btn-sm moreInfoBtn trap-claim-button-active" disabled="">
+                        <b>
+                          <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-lightning-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"></path>
+                          </svg> Trapper:
+                        </b> {{[Intake Trapper]}}
+                      </button>
+                    {{else}}
+                      <button id="trapClaimButton" type="button" class="btn btn-sm moreInfoBtn trap-claim-button" onclick="handleTrapClaim(this, {{entryId}})">I will trap!</button>
+                    {{/if}}
+                  </div>
+                </div>
+              {{/if}}
+              {{#if [Intake Needs Foster]}}
+                <div class="d-flex justify-content-between align-items-center row moreInfoBtn-container">
+                  <div class="btn-group col-12">
+                    {{#if [Intake Foster]}}
+                      <button id="trapClaimButton" type="button" class="btn btn-sm moreInfoBtn foster-claim-button-active" disabled="">
+                        <b>
+                          <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-house-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M8 3.293l6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
+                            <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
+                          </svg> Foster:
+                        </b> {{[Intake Foster]}}
+                      </button>
+                    {{else}}
+                      <button id="fosterClaimButton" type="button" class="btn btn-sm moreInfoBtn foster-claim-button" onclick="handleFosterClaim(this, {{entryId}})">I will foster!</button>
+                    {{/if}}
+                  </div>
+                </div>
+              {{/if}}
             </div>
           </div>
         </div>
@@ -674,25 +739,22 @@ svg {
                   <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
                 </svg>
                 <b>Comments:</b>
-                  <div>
-                    {{#each comments as | comment |}}
-                    <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
-                    {{/each}}
-                  </div>
+                  {{#if shortComments}}
+                    <div>
+                      {{#each shortComments as | comment |}}
+                      <div class="comment-container">[<small>{{comment.[0]}}</small>] {{comment.[2]}} -- <b>{{comment.[1]}}</b></div>
+                      {{/each}}
+                    </div>
+                    <a href="#" onclick="openMoreModal({{entryId}}, '#modalCommentContainer');" class="read-more-link"><small>View All Comments</small></a>
+                  {{else}}
+                   <small>N/A</small>
+                  {{/if}}
               </div>
-              <div style="margin: 1em 0 1em 0;" class="d-flex justify-content-between align-items-center row">
+              <div class="d-flex justify-content-between align-items-center row moreInfoBtn-container">
                 <div class="btn-group col-12">
-                  <button id={{entryId}} type="button" class="btn btn-sm moreInfoBtn" onclick="openMoreModal(this)">More Info</button>
+                  <button id={{entryId}} type="button" class="btn btn-sm moreInfoBtn" onclick="openMoreModal({{entryId}})">More Info</button>
                   <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
                 </div>
-              </div>
-              <div class="d-flex justify-content-around align-items-center row">
-                <a href="mailto:fosterswithscbi@straycatbluesinc.org?subject={{#if [Title]}}{{[Title]}}{{else}}New Foster Request!{{/if}}&body={{[Summary]}}">
-                  <button id="emailFosters" class="transparent-btn btn sqs-block-button-element--small">Email Fosters</button>
-                </a>
-                <a href="mailto:tnrtrappers@straycatbluesinc.org?subject={{#if [Title]}}{{[Title]}}{{else}}New Trapping Request!{{/if}}&body={{[Summary]}}">
-                  <button id="emailTrappers" class="transparent-btn btn sqs-block-button-element--small">Email Trappers</button>
-                </a>
               </div>
             </div>
           </div>
@@ -780,6 +842,7 @@ function createRowObject(headers, row){
     rowObject['submittedOn'] = new Date(rowObject['Timestamp']);
   }
   rowObject['comments'] = [];
+  rowObject['shortComments'] = [];
   rowObject['images'] = [];
   rowObject['headers'] = headers;
   rowObject['Summary'] = "";
@@ -851,6 +914,13 @@ function getCommentData(sheetData){
         if(rowEntry){
           comment.sheetIndex = index;
           rowEntry.comments.push(comment);
+          if (rowEntry.shortComments.length < 2) {
+            let shortComment = comment[2].slice(0, 100);
+            if (comment[2].length > shortComment.length) {
+              shortComment += '...';
+            }
+            rowEntry.shortComments.push([comment[0], comment[1], shortComment]);
+          }
         }
         index++;
       })
@@ -987,8 +1057,8 @@ $('#imagesModal').on('show.bs.modal', function (event) {
   }
 });
 
-function openMoreModal(buttonInfo, isCompleted){
-  let rowData = getRowData(buttonInfo.id);
+function openMoreModal(buttonId, scrollElem){
+  let rowData = getRowData(buttonId);
 
   if(rowData == []){
     //return error
@@ -996,6 +1066,11 @@ function openMoreModal(buttonInfo, isCompleted){
   else {
     currentRowData = rowData;
     $('#detailsModal').modal({show: true});
+    if (scrollElem) {
+      $('#detailsModal').on('shown.bs.modal', function (event) {
+       $('#detailsModal').animate({scrollTop: $(scrollElem).offset().top}, 2000);
+      });
+    }
   }
 }
 
@@ -1005,8 +1080,14 @@ $('#detailsModal').on('show.bs.modal', function (event) {
   modal.find('#moreInfoContainer')[0].innerHTML = '';
   $("#intakeTitle").val(currentRowData['Intake Title']);
   $("#intakeStatus").val(currentRowData['Intake Status']);
-  $('#intakeNeedsFoster').val(currentRowData['Intake Needs Foster']);
-  $('#intakeNeedsTrap').val(currentRowData['Intake Needs Trap']);
+  if (currentRowData['Intake Needs Foster'] == "on") {
+    $('#intakeNeedsFoster').val(currentRowData['Intake Needs Foster']);
+    $('#intakeNeedsFoster').prop( "checked", true );
+  }
+  if (currentRowData['Intake Needs Trap'] == "on") {
+    $('#intakeNeedsTrap').val(currentRowData['Intake Needs Trap']);
+    $('#intakeNeedsTrap').prop( "checked", true );
+  }
   for (let detail in currentRowData) {
     if (!["sheetIndex", "images", "comments", "entryId", "Intake Status",
           "Images", "headers", "Summary"].includes(detail)) {
@@ -1038,16 +1119,16 @@ $('#detailsModal').on('show.bs.modal', function (event) {
     $('#deleteButton').hide();
   }
 
-  $('#commentUserName').val(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName());
+  $('#commentUserName').val(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName());
 
   //get comments
   if(currentRowData.comments.length > 0){
     currentRowData.comments.forEach(comment => {
-      modal.find('#comments').append('<p>'+ comment[0] + '<br>' + comment[2] + '<br> --' + comment[1] + '</p>')
+      modal.find('#comments').append('<div class="comment-container">[<small>'+ comment[0] + '</small>] ' + comment[2] + ' -- <b>' + comment[1] + '</b></div>')
     })
   }
   else{
-     modal.find('#comments').append('<p> No comments yet </p>');
+     modal.find('#comments').append('<small>N/A</small>');
   }
 
   //get images
@@ -1134,14 +1215,40 @@ function saveComment(){
 
 function handleImageUploadClick(event) {
     cloudinary.createUploadWidget({
-      cloudName: '',
-      uploadPreset: '',
+      cloudName: 'stray-cat-blues',
+      uploadPreset: 'nqnjpbus',
       sources: ['local', 'camera']}, function(error, result) {
         if (!error && result && result.event === "success") {
-            $("#intakeImages").append('<div><img src="' + result.info.secure_url + '" class="img-previews"></div>');
             $('input[name="imageURLs"]').val( $('input[name="imageURLs"]').val() + result.info.secure_url + '\n');
+            let index = $('input[name="imageURLs"]').val().split('http').filter(url => url.length > 0).length;
+            $("#intakeImages").append('<div><img src="' + result.info.secure_url + '" class="img-previews">' +
+                '<button id="imageDelete' + index + '" onclick="deleteImage(this, \'' + result.info.secure_url.trim() + '\')" type="button" class="delete close" aria-label="Delete" style="display: inline-block;>' +
+                  '<span aria-hidden="true">&times;</span>' +
+                '</button></div>');
         }
       }).open();
+}
+
+function handleTrapClaim(btn, entryId) {
+  let name = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
+  let rowData = getRowData(entryId);
+  let updateRange = `AQ${rowData.sheetIndex}:AQ${rowData.sheetIndex}`;
+  $(btn).replaceWith('<button id="trapClaimButton" type="button" class="btn btn-sm moreInfoBtn trap-claim-button"' +
+          ' disabled=""><b><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-lightning-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">' +
+          '  <path fill-rule="evenodd" d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"></path>' +
+          '</svg> Trapper:</b> ' + name +'</button>');
+  updateSheetRow([name], updateRange);
+}
+function handleFosterClaim(btn, entryId) {
+  let name = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
+  let rowData = getRowData(entryId);
+  let updateRange = `AP${rowData.sheetIndex}:AP${rowData.sheetIndex}`;
+  $(btn).replaceWith('<button id="trapClaimButton" type="button" class="btn btn-sm moreInfoBtn foster-claim-button"' +
+          ' disabled=""><b style=><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-house-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">' +
+          '  <path fill-rule="evenodd" d="M8 3.293l6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>' +
+          '  <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>' +
+          '</svg> Foster:</b> ' + name +'</button>');
+    updateSheetRow([name], updateRange);
 }
 
 function resetImagesPreviews() {
@@ -1186,8 +1293,7 @@ function saveIntakeStatus(){
     formDataObj[entry.name] = entry.value;
   })
   let formDataArray = [formDataObj['imageURLs'], formDataObj['Intake Status'],
-    formDataObj['intakeTitle'], formDataObj['intakeNeedsFoster'],
-        formDataObj['intakeNeedsTrap']];
+    formDataObj['intakeTitle'], formDataObj['intakeNeedsFoster'], formDataObj['intakeNeedsTrap']];
   // currentRowData["headers"].forEach(header => {
   //   if (!["Timestamp"].includes(header)) {
   //     if (formDataObj[header] || formDataObj[header] == "") {
@@ -1198,7 +1304,7 @@ function saveIntakeStatus(){
   //   }
   // })
 
-  let updateRange = `AK${currentRowData.sheetIndex}:AM${currentRowData.sheetIndex}`
+  let updateRange = `AK${currentRowData.sheetIndex}:AO${currentRowData.sheetIndex}`;
   console.log(formData);
   console.log(updateRange);
   updateSheetRow(formDataArray, updateRange)
