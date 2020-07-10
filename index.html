@@ -1102,7 +1102,8 @@ $('#detailsModal').on('show.bs.modal', function (event) {
   }
   for (let detail in currentRowData) {
     if (!["sheetIndex", "images", "comments", "entryId", "Intake Status",
-          "Images", "headers", "Summary"].includes(detail)) {
+          "Images", "headers", "Summary", "Intake Title", "Intake Needs Foster",
+          "Intake Needs Trap", "Intake Foster", "Intake Trapper", "shortComments"].includes(detail)) {
       modal.find('#moreInfoContainer')[0].innerHTML += `
               <div class="form-group" style="padding-bottom: 0.5em;">
                 <label for="{detail}">${detail}</label>
