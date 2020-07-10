@@ -1069,6 +1069,7 @@ $('#imagesModal').on('show.bs.modal', function (event) {
 });
 
 function openMoreModal(buttonId, scrollElem){
+  let scrollElement = scrollElem;
   let rowData = getRowData(buttonId);
 
   if(rowData == []){
@@ -1077,9 +1078,9 @@ function openMoreModal(buttonId, scrollElem){
   else {
     currentRowData = rowData;
     $('#detailsModal').modal({show: true});
-    if (scrollElem) {
+    if (scrollElement) {
       $('#detailsModal').on('shown.bs.modal', function (event) {
-       $('#detailsModal').animate({scrollTop: $(scrollElem).offset().top}, 2000);
+       $('#detailsModal').animate({scrollTop: $(scrollElement).offset().top}, 2000);
       });
     }
   }
