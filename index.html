@@ -666,10 +666,15 @@ h3 {
                             <path fill-rule="evenodd" d="M8 3.293l6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
                             <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
                           </svg> Foster:
-                        </b> {{[Intake Foster]}}
+                        </b> {{#separate}} {{[Intake Foster]}} {{/separate}}
+                          {{#if (containsCurrentUser [Intake Foster])}}
+                            <div><a href="#" onclick="removeFosterClaim(this, {{entryId}})"> - Remove me!</a></div>
+                          {{else}}
+                            <div><a href="#" onclick="addFosterClaim(this, {{entryId}})"> + Add me!</a></div>
+                          {{/if}}
                       </button>
                     {{else}}
-                      <button id="fosterClaimButton" type="button" class="btn btn-sm moreInfoBtn foster-claim-button" onclick="handleFosterClaim(this, {{entryId}})">I will foster!</button>
+                      <button id="fosterClaimButton" type="button" class="btn btn-sm moreInfoBtn foster-claim-button" onclick="addFosterClaim(this, {{entryId}})">I will foster!</button>
                     {{/if}}
                   </div>
                 </div>
@@ -982,6 +987,12 @@ function readyHandlebars(data){
   let myParam = urlParams.get('tab');
   $('#navTab a[href="#'+myParam+'Entries"]').tab('show')
 }
+Handlebars.registerHelper('containsCurrentUser', function (container) {
+  return container.includes(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName());
+});
+Handlebars.registerHelper('separate', function (s) {
+  return s.fn(this).replace('\n', ',');
+});
 
 function getRowData(id){
   currentRowData = []; //clear row
@@ -1239,16 +1250,63 @@ function handleTrapClaim(btn, entryId) {
           '</svg> Trapper:</b> ' + name +'</button>');
   updateSheetRow([name], updateRange);
 }
-function handleFosterClaim(btn, entryId) {
-  let name = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
+function addFosterClaim(btn, entryId) {
   let rowData = getRowData(entryId);
-  let updateRange = `AP${rowData.sheetIndex}:AP${rowData.sheetIndex}`;
-  $(btn).replaceWith('<button id="trapClaimButton" type="button" class="btn btn-sm moreInfoBtn foster-claim-button"' +
-          ' disabled=""><b style=><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-house-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">' +
-          '  <path fill-rule="evenodd" d="M8 3.293l6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>' +
-          '  <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>' +
-          '</svg> Foster:</b> ' + name +'</button>');
-    updateSheetRow([name], updateRange);
+  let range = `AP${rowData.sheetIndex}:AP${rowData.sheetIndex}`;
+  // get the latest version of the data
+  gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: intakeSheetId,
+    range: range
+  }).then(function (response) {
+    let result = response.result.values[0][0].trim();
+    let name = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
+
+    // add the foster only if they are not registered
+    if (!result.includes(name)) {
+      let names = result + '\n' + name;
+      gapi.client.sheets.spreadsheets.values.batchUpdate({
+        spreadsheetId: intakeSheetId,
+        valueInputOption: 'RAW'
+      }, {'data': [{range: range, values: [[names]]}]
+      }).then(function(response) {
+        getSheetData();
+      }, function(err) {
+      console.log('Error removing foster!');
+      });
+    }
+  }, function (err) {
+    console.log('Error saving foster claim!');
+  });
+}
+
+function removeFosterClaim(btn, entryId) {
+  let rowData = getRowData(entryId);
+  let range = `AP${rowData.sheetIndex}:AP${rowData.sheetIndex}`;
+
+  // get the latest version of the data
+  gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: intakeSheetId,
+    range: range
+  }).then(function (response) {
+    let result = response.result.values[0][0];
+    let name = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
+
+    // remove the foster only if they are registered
+    if (result.includes(name)) {
+      let names = result.replace(name, '').trim();
+      gapi.client.sheets.spreadsheets.values.batchUpdate({
+        spreadsheetId: intakeSheetId,
+        valueInputOption: 'RAW'
+      }, {'data': [{range: range, values: [[names]]}]
+      }).then(function(response) {
+        getSheetData();
+      }, function(err) {
+      console.log('Error removing foster!');
+      });
+    }
+  }, function (err) {
+    console.log('Error saving foster claim!');
+  });
 }
 
 function resetImagesPreviews() {
