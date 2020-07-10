@@ -1110,6 +1110,16 @@ $('#detailsModal').on('show.bs.modal', function (event) {
               </div>`;
     }
   }
+  let title = currentRowData['Title'] ? currentRowData['Title'] : 'New Intake Request!';
+  $('#notify-container').html(`
+     <a href="mailto:fosterswithscbi@straycatbluesinc.org?subject=${title}&body=${currentRowData.Summary}">
+       <button id="emailFosters" class="transparent-btn btn sqs-block-button-element--small">Email Fosters</button>
+     </a>
+     <a href="mailto:tnrtrappers@straycatbluesinc.org?subject=${title}&body=${currentRowData.Summary}">
+       <button id="emailTrappers" class="transparent-btn btn sqs-block-button-element--small">Email Trappers</button>
+     </a>`);
+
+
   resetImagesPreviews();
 
   $('#uploadWidget').addClass("disable-div");
