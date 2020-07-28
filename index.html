@@ -1270,7 +1270,10 @@ function addFosterClaim(btn, entryId) {
     spreadsheetId: intakeSheetId,
     range: range
   }).then(function (response) {
-    let result = response.result.values[0][0].trim();
+    let result = '';
+    if (response.result.values) {
+      let result = response.result.values[0][0].trim();
+    }
     let name = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
 
     // add the foster only if they are not registered
