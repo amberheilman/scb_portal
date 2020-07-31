@@ -913,12 +913,12 @@ function getCommentData(sheetData){
       range.values.shift(); //remove headers from data
 
       let index = 2;
-      range.values.forEach(comment => {
+      range.values.reverse().forEach(comment => {
 
         let rowEntry = sheetData.find(x => x.entryId == comment[4]);
         if(rowEntry){
           comment.sheetIndex = index;
-          rowEntry.comments.push(comment);
+          rowEntry.comments.unshift(comment);
           if (rowEntry.shortComments.length < 2) {
             let shortComment = comment[2].slice(0, 100);
             if (comment[2].length > shortComment.length) {
@@ -928,7 +928,7 @@ function getCommentData(sheetData){
           }
         }
         index++;
-      })
+      });
     }
     getImageData(sheetData)
   }, function(response) {
