@@ -780,45 +780,34 @@ h3 {
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
-    <script>
-      $('#navTab a').on('click', function (e) {
-        e.preventDefault()
-        $(this).tab('show')
-      })
-      $(document).ready(function(){
-        $("#search").on("keyup", function() {
-          var value = $(this).val().toLowerCase();
-          $("#mainContainer").filter(function() {
-            $("#mainContainer").find('.card').each(function() {
-              if ($(this).text().toLowerCase().indexOf(value) > -1) {
-                $(this).show();
-              } else {
-                $(this).hide();
-              }
-            });
-          });
-        });
-        $(".tab-pane").click(function () {
-           if ($('#search').val()) {
-             var value = $(this).val().toLowerCase();
-             $("#mainContainer").filter(function() {
-             $("#mainContainer").find('.card').each(function() {
-              if ($(this).text().toLowerCase().indexOf(value) > -1) {
-                $(this).show();
-              } else {
-                $(this).hide();
-              }
-            });
-           });
-           }
-        })
-      });
-    </script>
     <script async defer src="https://apis.google.com/js/api.js"
       onload="this.onload=function(){};handleClientLoad()"
       onreadystatechange="if (this.readyState === 'complete') this.onload()">
     </script>
     <script>
+      $('#navTab a').on('click', function (e) {
+        e.preventDefault();
+        $(this).tab('show')
+      });
+      $(document).ready(function(){
+        $("#search").on("keyup", search);
+        $(".tab-pane").on('click', search);
+      });
+      function search() {
+        let searchVal = $("#search").val().toLowerCase();
+        if (searchVal) {
+          $("#mainContainer").filter(function () {
+            $("#mainContainer").find('.card').each(function () {
+              if ($(this).text().toLowerCase().indexOf(searchVal) > -1) {
+                $(this).parent().show();
+              } else {
+                $(this).parent().hide();
+              }
+            });
+          });
+        }
+      }
+
 const intakeSheetName = "Sheet1";
 
 
@@ -1036,6 +1025,7 @@ function updateSheetRow(updateData, updateRange){
       $('#intakeStatus, #intakeTitle, #intakeNeedsFoster, #intakeNeedsTrap').prop("disabled", true);
       $('#editContactButton').text("Edit");
   });
+  search();
 }
 
 // images modal
@@ -1183,6 +1173,7 @@ $('#detailsModal').on('hidden.bs.modal', function (event) {
   $('#commentFormContainer').hide()
   $('#commentUserName').val("");
   $('#commentContent').val("");
+  search();
 });
 
 function addComment(){
