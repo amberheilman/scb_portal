@@ -866,6 +866,7 @@ function getSheetData() {
     var range = response.result;
     if (range.values.length > 0) {
       parseSheetData(range);
+      showCat();
     } else {
       displayError('No data found.');
     }
@@ -895,7 +896,6 @@ function parseSheetData(response){
   rowDataObjectArray = rowDataObjectArray.reverse();
   globalSheetData = rowDataObjectArray;
   getCommentData(rowDataObjectArray);
-  showCat();
 }
 
 function getCommentData(sheetData){
@@ -1537,8 +1537,8 @@ var authorizedBlock= document.getElementById('authorizedBlock');
 let globalSheetData = {}; //local copy of intake form
 let currentRowData = []; //local copy of current entry seen in modal
 
-const intakeSheetId = "";
-const commentSheetId = "";
+const intakeSheetId = "1KHp3ckwInxWhydboRpKBFVQ7otvzynpHt0W7xI-8jJM";
+const commentSheetId = "1hE7uMEOYtzL3DrehA9egwkwpGEVvMd0BDJcIc144vMc";
 
 /**
  *  On load, called to load the auth2 library and API client library.
@@ -1603,29 +1603,27 @@ function handleSignoutClick(event) {
 }
 
 function showCat() {
-
-  var items = location.hash.split('-');
-  if (items) {
-    let loc = items[0];
-    let tabs = ['#newEntries', '#infoEntries', '#readyEntries', '#completedEntries'];
-    if (tabs.includes(loc)) {
-      $(`.nav-tabs a[href="${loc}"]`).tab('show');
-      $(`.nav-tabs a[href="${loc}"]`).on('shown.bs.tab', function(event){
-        $(loc).bind('DOMSubtreeModified', function(){
-
-      if (items[1]) {
-        $("#mainContainer").filter(function () {
-          $("#mainContainer").find('.card-img-container').each(function () {
-            if ($(this).attr('id') == items[1]) {
-              $('html, body').animate({scrollTop: $(this).offset().top}, 2000, 'swing', function(){
-                $(`#${items[1]}`).parent().fadeOut(1000).fadeIn(1000);
-              });
-            }
+  var item = location.hash;
+  if (item) {
+    let cat = globalSheetData.find(x => x.entryId == parseInt(item.substring(1, item.length)));
+    if (cat) {
+      let lookup = {
+        'new': '#newEntries',
+        'needsInfo': '#infoEntries',
+        'ready': '#readyEntries',
+        'completed': '#completedEntries'
+      };
+      let tab = lookup[cat['Intake Status']];
+      if (tab) {
+        $(`.nav-tabs a[href="${tab}"]`).tab('show');
+        $(`.nav-tabs a[href="${tab}"]`).on('shown.bs.tab', function (event) {
+          $(tab).bind('DOMSubtreeModified', function () {
+            $('html, body').animate({scrollTop: $(`#${cat.entryId}`).offset().top}, 2000, 'swing', function () {
+              $(item).parent().fadeOut(1000).fadeIn(1000);
+            });
           });
         });
       }
-      });
-        });
     }
   }
 }
