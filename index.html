@@ -167,6 +167,10 @@ h3 {
   margin: 0.5em;
   padding: 0.5em;
 }
+.comment-actions-container {
+  display: flex;
+  align-items: baseline;
+}
 .mini-button {
   font-size: 15px;
 }
@@ -206,7 +210,6 @@ h3 {
   .reverse {
     flex-wrap: wrap-reverse;
   }
-
 }
     </style>
   </head>
@@ -338,6 +341,9 @@ h3 {
         <div id="modalCommentContainer">
           <h4>Comments</h4>
             <button id="commentButton" class="btn btn-primary" onclick="addComment()">Add New Comment</button>
+            <div onclick="editComments()" class="btn btn-primary" id="editCommentsButton">Edit</div>
+            <input type="hidden" name="commentsToDelete" value="">
+            <div onclick="saveComments()" class="btn btn-success" id="saveCommentsButton" style="display: none;">Save</div>
             <span id="commentMessage"></span>
             <br>
             <div id="commentFormContainer">
@@ -787,7 +793,7 @@ h3 {
     <script>
       $('#navTab a').on('click', function (e) {
         e.preventDefault();
-        $(this).tab('show')
+        $(this).tab('show');
       });
       $(document).ready(function(){
         $("#search").on("keyup", search);
@@ -1137,7 +1143,7 @@ $('#detailsModal').on('show.bs.modal', function (event) {
   //get comments
   if(currentRowData.comments.length > 0){
     currentRowData.comments.forEach(comment => {
-      modal.find('#comments').append('<div class="comment-container">[<small>'+ comment[0] + '</small>] ' + comment[2] + ' -- <b>' + comment[1] + '</b></div>')
+      modal.find('#comments').append('<span onclick="addToCommentsToDelete(' + comment[4] + ')" aria-hidden="true" style="display: none;">&times;</span><div class="comment-actions-container"><div class="comment-container">[<small>'+ comment[0] + '</small>] ' + comment[2] + ' -- <b>' + comment[1] + '</b></div></div>')
     })
   }
   else{
@@ -1227,10 +1233,35 @@ function saveComment(){
   });
 }
 
+function editComments() {
+      if($('#editCommentsButton')[0].innerText == "Edit"){
+        $('#editCommentsButton').text("Cancel Edit");
+        let name = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
+        $('#modalCommentContainer').find('b').each(function() {
+          if ($(this).text() == name) {
+            $(this).closest('span').css({display: 'inline'});
+          }
+        });
+    }
+    else {
+        $('#editCommentsButton').text("Edit");
+        $('#saveCommentsButton').hide();
+    }
+}
+
+function addToCommentsToDelete(comment) {
+  $('input[name=commentsToDelete]').val($('input[name=commentsToDelete]').val() + ' ' + $(comment).parent().id);
+  $(comment).parent().hide();
+}
+
+function saveComments() {
+
+}
+
 function handleImageUploadClick(event) {
     cloudinary.createUploadWidget({
-      cloudName: 'stray-cat-blues',
-      uploadPreset: 'nqnjpbus',
+      cloudName: '',
+      uploadPreset: '',
       sources: ['local', 'camera']}, function(error, result) {
         if (!error && result && result.event === "success") {
             $('input[name="imageURLs"]').val( $('input[name="imageURLs"]').val() + result.info.secure_url + '\n');
@@ -1352,12 +1383,14 @@ function editIntakeStatus(){
 function saveIntakeStatus(){
   let formData = $('#intakeStatusForm').serializeArray();
 
-  let formDataObj = {}
+  let formDataObj = {};
   formData.forEach(entry => {
     formDataObj[entry.name] = entry.value;
-  })
+  });
+  let needsFoster = formDataObj['intakeNeedsFoster'] === 'on' ? 'on' : '';
+  let needsTrap = formDataObj['intakeNeedsTrap'] === 'on' ? 'on' : '';
   let formDataArray = [formDataObj['imageURLs'], formDataObj['Intake Status'],
-    formDataObj['intakeTitle'], formDataObj['intakeNeedsFoster'], formDataObj['intakeNeedsTrap']];
+    formDataObj['intakeTitle'], needsFoster, needsTrap];
   // currentRowData["headers"].forEach(header => {
   //   if (!["Timestamp"].includes(header)) {
   //     if (formDataObj[header] || formDataObj[header] == "") {
