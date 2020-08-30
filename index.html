@@ -895,6 +895,7 @@ function parseSheetData(response){
   rowDataObjectArray = rowDataObjectArray.reverse();
   globalSheetData = rowDataObjectArray;
   getCommentData(rowDataObjectArray);
+  showCat();
 }
 
 function getCommentData(sheetData){
@@ -1599,6 +1600,34 @@ function handleAuthClick(event) {
 function handleSignoutClick(event) {
   gapi.auth2.getAuthInstance().signOut();
   $( "#mainContainer" ).empty();
+}
+
+function showCat() {
+
+  var items = location.hash.split('-');
+  if (items) {
+    let loc = items[0];
+    let tabs = ['#newEntries', '#infoEntries', '#readyEntries', '#completedEntries'];
+    if (tabs.includes(loc)) {
+      $(`.nav-tabs a[href="${loc}"]`).tab('show');
+      $(`.nav-tabs a[href="${loc}"]`).on('shown.bs.tab', function(event){
+        $(loc).bind('DOMSubtreeModified', function(){
+
+      if (items[1]) {
+        $("#mainContainer").filter(function () {
+          $("#mainContainer").find('.card-img-container').each(function () {
+            if ($(this).attr('id') == items[1]) {
+              $('html, body').animate({scrollTop: $(this).offset().top}, 2000, 'swing', function(){
+                $(`#${items[1]}`).parent().fadeOut(1000).fadeIn(1000);
+              });
+            }
+          });
+        });
+      }
+      });
+        });
+    }
+  }
 }
   </script>
   </body>
