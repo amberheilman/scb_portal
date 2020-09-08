@@ -866,7 +866,6 @@ function getSheetData() {
     var range = response.result;
     if (range.values.length > 0) {
       parseSheetData(range);
-      showCat();
     } else {
       displayError('No data found.');
     }
@@ -978,10 +977,7 @@ function readyHandlebars(data){
   var completedData = { completedData: groupedByStatus["completed"]};
   var completedOutput = completedTemplate(completedData);
   document.getElementById("completedData").innerHTML = completedOutput;
-
-  let urlParams = new URLSearchParams(window.location.search);
-  let myParam = urlParams.get('tab');
-  $('#navTab a[href="#'+myParam+'Entries"]').tab('show')
+  showCat();
 }
 Handlebars.registerHelper('containsCurrentUser', function (container) {
   return container.includes(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName());
@@ -1614,13 +1610,15 @@ function showCat() {
         'completed': '#completedEntries'
       };
       let tab = lookup[cat['Intake Status']];
-      if (tab) {
+      if (tab == '#newEntries') {
+        $('html, body').animate({scrollTop: $(`#${cat.entryId}`).offset().top}, 2000, 'swing', function () {
+          $(item).parent().fadeOut(1000).fadeIn(1000);
+        });
+      } else {
         $(`.nav-tabs a[href="${tab}"]`).tab('show');
         $(`.nav-tabs a[href="${tab}"]`).on('shown.bs.tab', function (event) {
-          $(tab).bind('DOMSubtreeModified', function () {
-            $('html, body').animate({scrollTop: $(`#${cat.entryId}`).offset().top}, 2000, 'swing', function () {
-              $(item).parent().fadeOut(1000).fadeIn(1000);
-            });
+          $('html, body').animate({scrollTop: $(`#${cat.entryId}`).offset().top}, 2000, 'swing', function () {
+            $(item).parent().fadeOut(1000).fadeIn(1000);
           });
         });
       }
