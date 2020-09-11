@@ -1108,7 +1108,7 @@ $('#detailsModal').on('show.bs.modal', function (event) {
       }
     }
   }
-  let title = currentRowData['Title'] ? currentRowData['Title'] : 'New Intake Request!';
+  let title = currentRowData['Intake Title'] ? currentRowData['Intake Title'] : 'New Intake Request!';
   $('#notify-container').html(`
      <a href="mailto:fosterswithscbi@straycatbluesinc.org?subject=${title}&body=${currentRowData.Summary}">
        <button id="emailFosters" class="transparent-btn btn sqs-block-button-element--small">Email Fosters</button>
