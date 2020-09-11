@@ -1097,11 +1097,15 @@ $('#detailsModal').on('show.bs.modal', function (event) {
     if (!["sheetIndex", "images", "comments", "entryId", "Intake Status",
           "Images", "headers", "Summary", "Intake Title", "Intake Needs Foster",
           "Intake Needs Trap", "Intake Foster", "Intake Trapper", "shortComments"].includes(detail)) {
-      modal.find('#moreInfoContainer')[0].innerHTML += `
+      if (!detail.includes("After you submit")) {
+        if (!detail.includes("Be aware")) {
+          modal.find('#moreInfoContainer')[0].innerHTML += `
               <div class="form-group" style="padding-bottom: 0.5em;">
                 <label for="{detail}">${detail}</label>
                 <p style="background-color: #e9ecef; padding: 0.5em; border-radius: 0.5em;" id="${detail}">${currentRowData[detail]}</p>
               </div>`;
+        }
+      }
     }
   }
   let title = currentRowData['Title'] ? currentRowData['Title'] : 'New Intake Request!';
